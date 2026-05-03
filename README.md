@@ -1,6 +1,7 @@
 Simple GUI to route audio to multiple outputs and add EQ, LPF, HPF. Uses PipeWire and Adwaita.
 
 To use on NixOS with flakes:
+
 car-dsp.url = "github:asiantuntija/yet-another-car-dsp";
 
 outputs = {self, car-dsp, ...}
