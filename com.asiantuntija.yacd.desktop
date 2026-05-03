@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Yet Another Car DSP
+Comment=Audio DSP for Car Systems
+Exec=yet-another-car-dsp
+Icon=yet-another-car-dsp
+Terminal=false
+Categories=AudioVideo;Audio;
