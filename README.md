@@ -7,7 +7,6 @@ outputs = {self, car-dsp, ...}
 
 car-dsp.nixosModules.default
 {
-  # Add the overlay so 'pkgs.yet-another-car-dsp' exists
   nixpkgs.overlays = [ car-dsp.overlays.default ];
 }
 
