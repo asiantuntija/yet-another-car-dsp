@@ -18,9 +18,3 @@ Fully vibed, some bugs may exist.
 
 <!-- Standard Markdown syntax -->
 ![Program Preview](./assets/preview.png)
-
-<!-- HTML syntax for centering and resizing -->
-<p align="center">
-  <img src="./assets/preview.png" width="600" alt="Program Preview">
-</p>
-
