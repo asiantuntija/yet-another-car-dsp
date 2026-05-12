@@ -390,10 +390,13 @@ fn build_ui(app: &adw::Application) {
     glib::MainContext::default().spawn_local(async move {
         if let Ok(devices) = state_for_init.backend.get_output_devices().await {
             glib::idle_add_local(move || {
-                let mut widgets = widgets_for_init.borrow_mut();
-                for (i, device_name) in devices.iter().enumerate() {
-                    let w = add_device_to_ui(&state_for_init, device_name, &list_for_init, &stack_for_init);
-                    if i == 0 {
+                    let mut widgets = widgets_for_init.borrow_mut();
+                    for (i, device_name) in devices.iter().enumerate() {
+                        if widgets.contains_key(device_name) {
+                            continue;
+                        }
+                        let w = add_device_to_ui(&state_for_init, device_name, &list_for_init, &stack_for_init);
+                        if i == 0 {
                         stack_for_init.set_visible_child_name(device_name);
                         w.sidebar_btn.add_css_class("suggested-action");
                     }
@@ -410,6 +413,9 @@ fn build_ui(app: &adw::Application) {
             let mut widgets = widgets_for_receiver.borrow_mut();
             match event {
                 AppEvent::DeviceAdded(dev_name) => {
+                    if widgets.contains_key(&dev_name) {
+                        continue;
+                    }
                     let w = add_device_to_ui(&state_for_receiver, &dev_name, &list_for_receiver, &stack_for_receiver);
                     widgets.insert(dev_name, w);
                 }
