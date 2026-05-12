@@ -232,12 +232,48 @@ fn build_ui(app: &adw::Application) {
 
     let content_stack = Stack::new();
 
+    // General Settings Page
+    let settings_page = Box::new(Orientation::Vertical, 0);
+    settings_page.set_margin_bottom(12);
+    settings_page.set_margin_start(12);
+    settings_page.set_margin_end(12);
+    settings_page.set_margin_top(12);
+    let settings_title = gtk4::Label::builder()
+        .label("General Settings")
+        .build();
+    settings_title.add_css_class("title-1"); // Assuming a style class exists or using default
+    settings_page.append(&settings_title);
+    content_stack.add_named(&settings_page, Some("settings"));
+
     sidebar.add_css_class("sidebar");
     sidebar.set_margin_start(12);
     sidebar.set_margin_end(12);
     sidebar.set_margin_top(12);
     sidebar.set_margin_bottom(12);
     sidebar.set_width_request(220);
+
+    // General Settings Button
+    let settings_btn = gtk4::Button::with_label("⚙ Settings");
+    settings_btn.set_margin_bottom(12);
+    settings_btn.set_margin_start(12);
+    settings_btn.set_margin_end(12);
+    settings_btn.set_margin_top(12);
+
+    let stack_settings_clone = content_stack.clone();
+    let sidebar_settings_clone = sidebar.clone();
+    let settings_btn_clone = settings_btn.clone();
+    settings_btn.connect_clicked(move |_| {
+        stack_settings_clone.set_visible_child_name("settings");
+        
+        let mut child = sidebar_settings_clone.first_child();
+        while let Some(c) = child {
+            if let Some(button) = c.downcast_ref::<gtk4::Button>() {
+                button.remove_css_class("suggested-action");
+            }
+            child = c.next_sibling();
+        }
+        settings_btn_clone.add_css_class("suggested-action");
+    });
 
     // Global Save All button
     let save_all_btn = gtk4::Button::builder()
@@ -265,7 +301,8 @@ fn build_ui(app: &adw::Application) {
 
     footer_box.append(&save_all_btn);
 
-    // Sidebar layout: [Scrollable Device List] -> [Footer]
+    // Sidebar layout: [Settings Button] -> [Scrollable Device List] -> [Footer]
+    sidebar.append(&settings_btn);
     sidebar.append(&scroll_window);
     sidebar.append(&footer_box);
 
