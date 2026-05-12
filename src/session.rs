@@ -36,9 +36,24 @@ fn default_effect_order() -> Vec<crate::effects::EffectType> {
     vec![crate::effects::EffectType::EQ, crate::effects::EffectType::LPF, crate::effects::EffectType::HPF]
 }
 
-#[derive(Serialize, Deserialize, Default, Clone)]
+fn default_vs_vol() -> f32 {
+    0.5
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct SessionData {
     pub devices: HashMap<String, DeviceSettings>,
+    #[serde(default = "default_vs_vol")]
+    pub virtual_sink_volume: f32,
+}
+
+impl Default for SessionData {
+    fn default() -> Self {
+        Self {
+            devices: HashMap::new(),
+            virtual_sink_volume: default_vs_vol(),
+        }
+    }
 }
 
 pub struct SessionManager {

@@ -111,6 +111,11 @@ fn build_ui(app: &adw::Application) {
 
             let session_data = state_init.state.lock().unwrap().current.clone();
             
+            // Apply saved virtual sink volume on startup
+            if let Err(e) = state_init.backend.set_virtual_sink_volume(session_data.virtual_sink_volume).await {
+                error!("Error applying initial virtual sink volume: {}", e);
+            }
+            
             if let Ok(available_devices) = state_init.backend.get_output_devices().await {
                 info!("Available output devices for init: {:?}", available_devices);
                 for (dev, settings) in &session_data.devices {
@@ -250,8 +255,9 @@ fn build_ui(app: &adw::Application) {
         .margin_top(12)
         .build();
     settings_page.append(&vs_vol_label);
-
-    let vs_vol_adj = gtk4::Adjustment::new(0.5, 0.0, 1.0, 0.01, 0.1, 0.0);
+    
+    let initial_vs_vol = state.state.lock().unwrap().current.virtual_sink_volume;
+    let vs_vol_adj = gtk4::Adjustment::new(initial_vs_vol as f64, 0.0, 1.0, 0.01, 0.1, 0.0);
     let vs_vol_scale = gtk4::Scale::new(Orientation::Horizontal, Some(&vs_vol_adj));
     vs_vol_scale.set_draw_value(false);
     vs_vol_scale.set_hexpand(true);

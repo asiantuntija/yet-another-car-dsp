@@ -115,7 +115,8 @@ impl AppState {
 
     pub fn is_any_dirty(&self) -> bool {
         let state = self.state.lock().unwrap();
-        state.current.devices != state.saved.devices
+        state.current.devices != state.saved.devices 
+            || state.current.virtual_sink_volume != state.saved.virtual_sink_volume
     }
 
      pub fn revert_device(&self, device: &str) -> (crate::session::DeviceSettings, bool, String) {
@@ -349,8 +350,13 @@ impl AppState {
     }
 
     pub fn set_virtual_sink_volume(self: &Arc<Self>, volume: f32) {
+        {
+            let mut state = self.state.lock().unwrap();
+            state.current.virtual_sink_volume = volume;
+        }
         let _ = self.tx.send(BackendCmd::SetVirtualSinkVolume(volume));
     }
+
 
     pub fn is_device_dirty(&self, device: &str) -> bool {
 
