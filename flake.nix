@@ -24,6 +24,7 @@
           gtk4
           libadwaita
           glib
+          jack2
           pango
           cairo
           gdk-pixbuf
