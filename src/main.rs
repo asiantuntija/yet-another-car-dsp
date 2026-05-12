@@ -243,6 +243,10 @@ fn build_ui(app: &adw::Application) {
     settings_page.set_margin_start(12);
     settings_page.set_margin_end(12);
     settings_page.set_margin_top(12);
+
+    let settings_overlay = gtk4::Overlay::new();
+    settings_overlay.set_child(Some(&settings_page));
+
     let settings_title = gtk4::Label::builder()
         .label("General Settings")
         .build();
@@ -268,7 +272,36 @@ fn build_ui(app: &adw::Application) {
     });
     settings_page.append(&vs_vol_scale);
 
-    content_stack.add_named(&settings_page, Some("settings"));
+    let settings_actions_box = gtk4::Box::new(Orientation::Horizontal, 10);
+    settings_actions_box.add_css_class("actions-box");
+    settings_actions_box.set_halign(gtk4::Align::Center);
+    settings_actions_box.set_valign(gtk4::Align::End);
+    settings_actions_box.set_visible(false);
+
+    let settings_save_btn = gtk4::Button::with_label("Save");
+    settings_save_btn.add_css_class("suggested-action");
+    let settings_cancel_btn = gtk4::Button::with_label("Cancel");
+    settings_cancel_btn.add_css_class("destructive-action");
+
+    settings_actions_box.append(&settings_save_btn);
+    settings_actions_box.append(&settings_cancel_btn);
+    settings_actions_box.set_margin_bottom(20);
+    settings_actions_box.set_margin_top(10);
+    settings_overlay.add_overlay(&settings_actions_box);
+
+    let state_save_vs = Arc::clone(&state);
+    settings_save_btn.connect_clicked(move |_| {
+        state_save_vs.save_virtual_sink_volume();
+    });
+
+    let state_cancel_vs = Arc::clone(&state);
+    let vs_scale_clone = vs_vol_scale.clone();
+    settings_cancel_btn.connect_clicked(move |_| {
+        let val = state_cancel_vs.revert_virtual_sink_volume();
+        vs_scale_clone.set_value(val as f64);
+    });
+
+    content_stack.add_named(&settings_overlay, Some("settings"));
 
     sidebar.add_css_class("sidebar");
     sidebar.set_margin_start(12);
@@ -394,10 +427,14 @@ fn build_ui(app: &adw::Application) {
     let widgets_for_timer = Rc::clone(&device_widgets);
     let state_for_timer = Arc::clone(&state_ui_clone);
     let btn_for_timer = save_all_btn_clone.clone();
+    let settings_actions_box_clone = settings_actions_box.clone();
 
     let state_timer_id = timeout_add_local(std::time::Duration::from_millis(200), move || {
         let is_dirty = state_for_timer.is_any_dirty();
         btn_for_timer.set_visible(is_dirty);
+
+        let vs_dirty = state_for_timer.is_virtual_sink_dirty();
+        settings_actions_box_clone.set_visible(vs_dirty);
 
         let widgets = widgets_for_timer.borrow();
         for (dev_name, w) in widgets.iter() {

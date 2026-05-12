@@ -119,7 +119,24 @@ impl AppState {
             || state.current.virtual_sink_volume != state.saved.virtual_sink_volume
     }
 
-     pub fn revert_device(&self, device: &str) -> (crate::session::DeviceSettings, bool, String) {
+    pub fn is_virtual_sink_dirty(&self) -> bool {
+        let state = self.state.lock().unwrap();
+        state.current.virtual_sink_volume != state.saved.virtual_sink_volume
+    }
+
+    pub fn save_virtual_sink_volume(&self) {
+        let mut state = self.state.lock().unwrap();
+        self.session_mgr.save(&state.current);
+        state.saved.virtual_sink_volume = state.current.virtual_sink_volume;
+    }
+
+    pub fn revert_virtual_sink_volume(&self) -> f32 {
+        let mut state = self.state.lock().unwrap();
+        state.current.virtual_sink_volume = state.saved.virtual_sink_volume;
+        state.current.virtual_sink_volume
+    }
+
+    pub fn revert_device(&self, device: &str) -> (crate::session::DeviceSettings, bool, String) {
         let mut state = self.state.lock().unwrap();
         
         // Clone settings first to avoid overlapping borrow of 'state'
