@@ -309,6 +309,10 @@ impl PipeWireBackend {
         self.run_cmd("pactl", &["set-sink-volume", device, &vol_percent]).await.map(|_| ())
     }
 
+    pub async fn set_virtual_sink_volume(&self, volume: f32) -> Result<(), BackendError> {
+        self.set_device_volume(VIRTUAL_SINK_NAME, volume).await
+    }
+
     pub async fn set_effect_value(&self, device: &str, effect: EffectType, value: f32) -> Result<(), BackendError> {
     debug!("Backend: Updating {:?} for {} to {}Hz", effect, device, value);
     

@@ -243,6 +243,25 @@ fn build_ui(app: &adw::Application) {
         .build();
     settings_title.add_css_class("title-1"); // Assuming a style class exists or using default
     settings_page.append(&settings_title);
+
+    let vs_vol_label = gtk4::Label::builder()
+        .label("Virtual Sink Volume")
+        .halign(gtk4::Align::Start)
+        .margin_top(12)
+        .build();
+    settings_page.append(&vs_vol_label);
+
+    let vs_vol_adj = gtk4::Adjustment::new(0.5, 0.0, 1.0, 0.01, 0.1, 0.0);
+    let vs_vol_scale = gtk4::Scale::new(Orientation::Horizontal, Some(&vs_vol_adj));
+    vs_vol_scale.set_draw_value(false);
+    vs_vol_scale.set_hexpand(true);
+    
+    let state_vs_clone = Arc::clone(&state);
+    vs_vol_scale.connect_value_changed(move |scale| {
+        state_vs_clone.set_virtual_sink_volume(scale.value() as f32);
+    });
+    settings_page.append(&vs_vol_scale);
+
     content_stack.add_named(&settings_page, Some("settings"));
 
     sidebar.add_css_class("sidebar");

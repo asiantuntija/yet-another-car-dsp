@@ -8,6 +8,7 @@ use log::{error, debug, info};
 #[derive(Debug)]
 pub enum BackendCmd {
     UpdateVolume(String, f32),
+    SetVirtualSinkVolume(f32),
     UpdateEffectActive(String, crate::effects::EffectType, bool),
     UpdateEffectValue(String, crate::effects::EffectType, f32),
     UpdateEQ(String, Vec<f32>),
@@ -53,6 +54,11 @@ impl AppState {
                 BackendCmd::UpdateVolume(dev, vol) => {
                     if let Err(e) = self.backend.set_device_volume(&dev, vol).await {
                         error!("Worker: Failed to set volume for {}: {}", dev, e);
+                    }
+                }
+                BackendCmd::SetVirtualSinkVolume(vol) => {
+                    if let Err(e) = self.backend.set_virtual_sink_volume(vol).await {
+                        error!("Worker: Failed to set virtual sink volume: {}", e);
                     }
                 }
                 BackendCmd::UpdateEffectActive(dev, eff, active) => {
@@ -340,6 +346,10 @@ impl AppState {
         if is_active {
             let _ = self.tx.send(BackendCmd::UpdateEQ(device_str, values));
         }
+    }
+
+    pub fn set_virtual_sink_volume(self: &Arc<Self>, volume: f32) {
+        let _ = self.tx.send(BackendCmd::SetVirtualSinkVolume(volume));
     }
 
     pub fn is_device_dirty(&self, device: &str) -> bool {
